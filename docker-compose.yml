@@ -1,0 +1,39 @@
+services:
+  tg-bot:
+    image: event-calendar-bot
+    restart: always
+    build: ../tgbot
+    env_file:
+      - ../tgbot/file.env
+    depends_on:
+      - backend
+
+  backend:
+    image: event-calendar
+    restart: always
+    build: ../backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../backend/file.env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres/init/:/docker-entrypoint-initdb.d/
+      - /opt/postgres/data:/var/lib/postgresql/data
+    env_file:
+      - ./postgres/file.env
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+
