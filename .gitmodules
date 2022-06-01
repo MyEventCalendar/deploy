@@ -1,0 +1,6 @@
+[submodule "backend"]
+	path = backend
+	url = https://github.com/MyEventCalendar/backend
+[submodule "tgbot"]
+	path = tgbot
+	url = https://github.com/MyEventCalendar/tgbot
