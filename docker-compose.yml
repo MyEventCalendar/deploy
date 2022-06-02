@@ -1,34 +1,42 @@
 services:
-  tg-bot:
-    image: event-calendar-bot
+  tgbot:
+    image: event-tgbot
     restart: always
     build: tgbot
+    environment:
+      API_URL: http://backend:8000
     env_file:
       - tgbot/file.env
     depends_on:
       - backend
 
   backend:
-    image: event-calendar
+    image: event-backend
     restart: always
     build: backend
-    ports:
-      - "8000:8000"
-    env_file:
-      - backend/file.env
+#    ports:
+#      - "8000:8000"
+    environment:
+      POSTGRES_USER: events
+      POSTGRES_PASSWORD: events
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: events
+      DJANGO_PORT: 8000
+      DJANGO_HOST: 0.0.0.0
     depends_on:
       db:
         condition: service_healthy
 
   db:
     image: postgres:14
-    ports:
-      - "5432:5432"
+#    ports:
+#      - "5432:5432"
     volumes:
       - ./postgres/init/:/docker-entrypoint-initdb.d/
       - /opt/postgres/data:/var/lib/postgresql/data
-    env_file:
-      - ./postgres/file.env
+    environment:
+      POSTGRES_PASSWORD: postgres
     restart: always
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
